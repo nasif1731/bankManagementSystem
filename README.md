@@ -1,4 +1,4 @@
-# Software Re-Engineering Assignment 1
+# Software Re-Engineering Project
 
 **Student Name:** Nehal Asif & Ibrahim Khan  
 **Course:** Software Re-Engineering  
@@ -6,7 +6,7 @@
 
 ---
 
-## 🚀 Assignment Instructions (Docker & SonarQube)
+## 🚀 Project Instructions (Docker & SonarQube)
 
 ### 1. Project Overview
 This repository contains the containerized version of a Java-based ATM Simulator.  
@@ -52,7 +52,7 @@ docker run --rm --network host `
 -v "${PWD}:/usr/src/mymaven" `
 -w /usr/src/mymaven `
 maven:3.9-eclipse-temurin-17 /bin/bash -c "
-mvn clean verify org.sonarsource.scanner.maven:sonar -Dsonar.projectKey=atm_simulator -Dsonar.projectName='ATM Simulator' -Dsonar.host.url=http://host.docker.internal:9000 -Dsonar.token=YOUR_TOKEN_HERE
+mvn clean verify org.sonarsource.scanner.maven:sonar -Dsonar.projectKey=atm_1 -Dsonar.projectName='My Awesome ATM' -Dsonar.host.url=http://host.docker.internal:9000 -Dsonar.token=YOUR_TOKEN_HERE
 "
 ```
 
