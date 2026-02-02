@@ -1,0 +1,39 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: atm-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bank_management_system
+    ports:
+      - "3306:3306"
+    networks:
+      - atm-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  atm-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: atm-app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: bank_management_system
+    ports:
+      - "8080:8080"
+    networks:
+      - atm-network
+    volumes:
+      - ./logs:/app/logs
+
+networks:
+  atm-network:
+    driver: bridge

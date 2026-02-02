@@ -1,0 +1,6 @@
+projectKey=atm_1
+serverUrl=http://host.docker.internal:9000
+serverVersion=26.1.0.118079
+dashboardUrl=http://host.docker.internal:9000/dashboard?id=atm_1
+ceTaskId=c8df82f9-04b2-4c1c-a118-17625e84847d
+ceTaskUrl=http://host.docker.internal:9000/api/ce/task?id=c8df82f9-04b2-4c1c-a118-17625e84847d
