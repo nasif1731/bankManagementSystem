@@ -1,3 +1,82 @@
+# Software Re-Engineering Assignment 1
+
+**Student Name:** Nehal Asif & Ibrahim Khan  
+**Course:** Software Re-Engineering  
+**Project:** Code Analyis of ATM Simulator (Bank Management System)
+
+---
+
+## 🚀 Assignment Instructions (Docker & SonarQube)
+
+### 1. Project Overview
+This repository contains the containerized version of a Java-based ATM Simulator.  
+The project includes a `Dockerfile` for consistent deployment and has been analyzed using **SonarQube** for software quality assessment as part of the Software Re-Engineering assignment.
+
+---
+
+### 2. How to Run with Docker
+
+**Prerequisite:** Docker Desktop must be installed and running.
+
+#### Step 1: Build the Docker Image
+```bash
+docker build -t atm-simulator .
+```
+
+#### Step 2: Run the Docker Container
+```bash
+docker run --name atm-app atm-simulator
+```
+
+---
+
+### 3. SonarQube Analysis Steps
+
+#### Step 1: Start SonarQube Server
+```bash
+docker run -d --name sonarqube -p 9000:9000 sonarqube:community
+```
+
+Access SonarQube at:  
+`http://localhost:9000`
+
+(Default credentials: `admin / admin`)
+
+---
+
+#### Step 2: Run SonarQube Scanner
+> Use this command in **PowerShell** (no local Maven installation required):
+
+```powershell
+docker run --rm --network host `
+-v "${PWD}:/usr/src/mymaven" `
+-w /usr/src/mymaven `
+maven:3.9-eclipse-temurin-17 /bin/bash -c "
+mvn clean verify org.sonarsource.scanner.maven:sonar -Dsonar.projectKey=atm_simulator -Dsonar.projectName='ATM Simulator' -Dsonar.host.url=http://host.docker.internal:9000 -Dsonar.token=YOUR_TOKEN_HERE
+"
+```
+
+⚠️ Replace `YOUR_TOKEN_HERE` with your SonarQube authentication token.
+
+---
+
+### 4. SonarQube Analysis Results
+
+- **Code Smells:** 152  
+- **Code Duplication:** 22.5%  
+- **Security Rating:** E (Critical)  
+
+These results highlight areas for refactoring, improved maintainability, and security hardening.
+
+---
+
+<details>
+<summary><strong>🔻 Click here to view Original Project Documentation 🔻</strong></summary>
+
+## Bank Management System
+
+This section contains the **original documentation** from the source repository.
+
 <!-- Bank Management System -->
 # ATM Simulator (Bank Management System)
 
@@ -60,3 +139,9 @@ If you have to add a feature, please fork the repo and create a pull request.
 5. Open a Pull Request
 
 <p align="right">(<a href="#top">back to top</a>)</p>
+
+
+</details>
+
+
+
