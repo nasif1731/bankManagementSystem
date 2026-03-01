@@ -1,0 +1,48 @@
+# GUI-enabled runtime image for ATM Simulator (Swing over noVNC)
+FROM maven:3.9-eclipse-temurin-11 AS builder
+
+WORKDIR /build
+COPY pom.xml .
+COPY src/ ./src/
+RUN mvn clean package -DskipTests -q
+
+FROM eclipse-temurin:11-jre
+
+WORKDIR /app
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+       mysql-client \
+       xvfb \
+       x11vnc \
+       fluxbox \
+       novnc \
+       websockify \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -s /bin/bash appuser
+
+COPY --from=builder /build/target/ATM_Simulator.jar .
+COPY sql/ATM_Simulator.sql .
+COPY docker-entrypoint.sh .
+COPY docker-gui-entrypoint.sh .
+
+RUN sed -i 's/\r$//' docker-entrypoint.sh docker-gui-entrypoint.sh \
+    && chmod +x docker-entrypoint.sh docker-gui-entrypoint.sh \
+    && chown -R appuser:appuser /app
+
+USER appuser
+
+EXPOSE 5900 6080
+
+ENV DB_HOST=mysql
+ENV DB_PORT=3306
+ENV DB_USER=root
+ENV DB_PASSWORD=root
+ENV DB_NAME=bank_management_system
+ENV DISPLAY=:1
+ENV VNC_PORT=5900
+ENV NOVNC_PORT=6080
+
+ENTRYPOINT ["./docker-gui-entrypoint.sh"]
+CMD ["java", "-jar", "ATM_Simulator.jar"]

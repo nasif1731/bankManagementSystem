@@ -15,6 +15,8 @@ services:
       retries: 10
 
   atm-app:
+    profiles:
+      - gui
     build:
       context: .
       dockerfile: Dockerfile
@@ -33,6 +35,31 @@ services:
       - atm-network
     volumes:
       - ./logs:/app/logs
+
+  atm-gui:
+    profiles:
+      - gui-docker
+    build:
+      context: .
+      dockerfile: Dockerfile.gui
+    container_name: atm-gui
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: bank_management_system
+      DISPLAY: :1
+      VNC_PORT: 5900
+      NOVNC_PORT: 6080
+    ports:
+      - "6080:6080"
+      - "5900:5900"
+    networks:
+      - atm-network
 
 networks:
   atm-network:

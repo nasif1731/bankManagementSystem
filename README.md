@@ -18,14 +18,37 @@ The project includes a `Dockerfile` for consistent deployment and has been analy
 
 **Prerequisite:** Docker Desktop must be installed and running.
 
-#### Step 1: Build the Docker Image
+#### Step 1: Start MySQL (recommended for this Swing app)
+```bash
+docker compose up -d mysql
+```
+
+#### Step 2: Run the Java GUI on your host machine
+```bash
+mvn clean package
+java -jar target/ATM_Simulator.jar
+```
+
+> Note: The ATM app uses Java Swing and needs a display server. Running `atm-app` inside a normal Linux container will throw `HeadlessException` unless you configure X11 forwarding.
+
+#### Optional: Build Docker image manually
 ```bash
 docker build -t atm-simulator .
 ```
 
-#### Step 2: Run the Docker Container
+#### Optional: Run full GUI in Docker (VNC/noVNC)
 ```bash
-docker run --name atm-app atm-simulator
+docker compose --profile gui-docker up -d --build
+```
+
+Then open:
+
+- `http://localhost:6080/vnc.html` (browser-based GUI)
+
+To stop:
+
+```bash
+docker compose --profile gui-docker down
 ```
 
 ---
