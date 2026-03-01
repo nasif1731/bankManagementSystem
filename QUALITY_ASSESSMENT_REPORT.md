@@ -56,37 +56,37 @@ Equivalent maintainability indicators used in this report:
 
 For method-level estimation in this report:
 
-\[
+$$
 CC_{method} = 1 + if + for + while + case + catch + && + || + ternary
-\]
+$$
 
 Project-level Sonar complexity is computed by Sonar’s internal parser over all functions/classes and may include constructors/static initializers as separate executable blocks.
 
 #### B) Duplication Density
 
-\[
+$$
 Duplicated\ Lines\ Density = \frac{Duplicated\ Lines}{NCLOC} \times 100
-\]
+$$
 
 With Sonar values:
 
-\[
+$$
 \frac{533}{1975} \times 100 = 26.99\% \; (raw ratio)
-\]
+$$
 
 Sonar-reported density is **22.3%** because Sonar uses its own duplication engine and language normalization rules (tokens/blocks and effective lines), not a simple raw line ratio.
 
 #### C) Debt Time Conversion
 
-\[
+$$
 1329\ min \div 60 = 22.15\ hours
-\]
+$$
 
 #### D) Debt with 20% Buffer
 
-\[
+$$
 22.15 \times 1.20 = 26.58\ hours
-\]
+$$
 
 ---
 
@@ -180,9 +180,9 @@ Notes:
 
 ### 3.1 Ca / Ce / Instability by Class
 
-\[
+$$
 I = \frac{Ce}{Ca + Ce}
-\]
+$$
 
 | Class | Fan-in (Ca) | Fan-out (Ce) | Instability (I) |
 |---|---:|---:|---:|
@@ -279,15 +279,15 @@ Project observed debt hotspots:
 
 Sonar `sqale_index = 1329` minutes.
 
-\[
+$$
 1329 \div 60 = 22.15\text{ hours}
-\]
+$$
 
 ### 5.2 Add 20% Buffer
 
-\[
+$$
 22.15 \times 1.20 = 26.58\text{ hours}
-\]
+$$
 
 ### 5.3 Debt Ratio
 
