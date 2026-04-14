@@ -1,0 +1,19 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate*
+.tfvars
+*.tfstate
+
+# Local files
+.DS_Store
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+
+# AWS/SSH
+*.pem
+!.gitkeep
