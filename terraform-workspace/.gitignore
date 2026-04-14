@@ -1,0 +1,68 @@
+# Root .gitignore for terraform-workspace
+
+# Terraform state files (SENSITIVE - NEVER COMMIT)
+**/*.tfstate
+**/*.tfstate.*
+**/.terraform.lock.hcl
+
+# Terraform directories
+**/.terraform/
+**/terraform.d/
+
+# Variable override files
+**/*.auto.tfvars
+**/override.tf
+**/override.tf.json
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# SSH Keys (SENSITIVE - NEVER COMMIT)
+*.pem
+*.key
+!*.pub
+id_rsa
+id_rsa.pub
+task*-key
+task*-key.pub
+
+# Logs
+**/*.log
+**/crash.log
+*.log
+
+# Backups
+*.bak
+*.backup
+*.tmp
+
+# Performance monitoring
+**/.performance_test
+
+# Terraform cache
+**/cache/
+
+# Others
+.env
+.env.local
+.env.*.local
+.venv/
+env/
