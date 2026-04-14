@@ -1,170 +1,517 @@
-# Software Re-Engineering Project
+# Bank Management System - Terraform Infrastructure
 
-**Student Name:** Nehal Asif & Ibrahim Khan  
-**Course:** Software Re-Engineering  
-**Project:** Code Analyis of ATM Simulator (Bank Management System)
+Comprehensive Infrastructure as Code (IaC) project using **Terraform** to deploy and manage AWS cloud resources with modular architecture and automation.
 
----
+## Table of Contents
 
-## 🚀 Project Instructions (Docker & SonarQube)
-
-### 1. Project Overview
-This repository contains the containerized version of a Java-based ATM Simulator.  
-The project includes a `Dockerfile` for consistent deployment and has been analyzed using **SonarQube** for software quality assessment as part of the Software Re-Engineering assignment.
-
----
-
-### 2. How to Run with Docker
-
-**Prerequisite:** Docker Desktop must be installed and running.
-
-#### Step 1: Start MySQL (recommended for this Swing app)
-```bash
-docker compose up -d mysql
-```
-
-#### Step 2: Run the Java GUI on your host machine
-```bash
-mvn clean package
-java -jar target/ATM_Simulator.jar
-```
-
-> Note: The ATM app uses Java Swing and needs a display server. Running `atm-app` inside a normal Linux container will throw `HeadlessException` unless you configure X11 forwarding.
-
-#### Optional: Build Docker image manually
-```bash
-docker build -t atm-simulator .
-```
-
-#### Optional: Run full GUI in Docker (VNC/noVNC)
-```bash
-docker compose --profile gui-docker up -d --build
-```
-
-Then open:
-
-- `http://localhost:6080/vnc.html` (browser-based GUI)
-
-To stop:
-
-```bash
-docker compose --profile gui-docker down
-```
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Task Breakdown](#task-breakdown)
+- [Initialization and Application](#initialization-and-application)
+- [AWS Resources](#aws-resources)
+- [Destroy Resources](#destroy-resources)
+- [Troubleshooting](#troubleshooting)
 
 ---
 
-### 3. SonarQube Analysis Steps
+## Overview
 
-#### Step 1: Start SonarQube Server
+This project demonstrates enterprise-grade Infrastructure as Code practices using Terraform to provision and manage AWS resources across multiple tasks:
+
+- **Task 1**: VPC infrastructure with public/private subnets
+- **Task 2**: Network security groups with granular ingress/egress rules
+- **Task 3**: EC2 compute resources with Elastic IPs
+- **Task 4**: Auto Scaling Groups (ASG) with launch templates and CloudWatch monitoring
+- **Task 5**: Application Load Balancer (ALB) with target group management
+- **Task 6**: Modularized infrastructure with Packer custom AMI builds
+
+Each task builds upon previous configurations, creating a layered, scalable cloud infrastructure.
+
+---
+
+## Prerequisites
+
+### Required Tools
+
+1. **Terraform** (v1.0 or later)
+   ```bash
+   terraform version
+   ```
+   Install from: https://www.terraform.io/downloads.html
+
+2. **AWS CLI** (v2 or later)
+   ```bash
+   aws --version
+   ```
+   Install from: https://aws.amazon.com/cli/
+
+3. **AWS Credentials Configured**
+   ```bash
+   aws configure
+   ```
+   - AWS Access Key ID
+   - AWS Secret Access Key
+   - Default Region (e.g., us-east-1)
+
+4. **Packer** (for Task 6 custom AMI)
+   ```bash
+   packer version
+   ```
+   Install from: https://www.packer.io/downloads
+
+5. **Git** (for version control)
+   ```bash
+   git --version
+   ```
+
+### Account Requirements
+
+- Active AWS account with:
+  - EC2, VPC, Load Balancing, Auto Scaling permissions
+  - IAM permissions to create roles and policies
+  - CloudWatch monitoring access
+
+---
+
+## Project Structure
+
+```
+bankManagementSystem/
+├── README.md                           # This file
+├── README_BANKING_PROJECT_BACKUP.md    # Original project documentation
+├── pom.xml                             # Maven configuration (Java application)
+├── Dockerfile & docker-compose.yml     # Container deployment configs
+├── terraform-workspace/                # Main Terraform workspace
+│
+├── task1-vpc/                          # VPC Infrastructure
+│   ├── main.tf                         # VPC, subnets, IGW, NAT Gateway
+│   ├── variables.tf                    # Input variables
+│   ├── outputs.tf                      # Output values (VPC ID, subnet IDs, etc.)
+│   ├── terraform.tfvars                # Variable values
+│   └── README.md                       # Task-specific documentation
+│
+├── task2/                              # Network Security
+│   ├── main.tf                         # Security groups with rules
+│   ├── variables.tf
+│   ├── outputs.tf                      # SG IDs for downstream tasks
+│   ├── terraform.tfvars
+│   └── README.md
+│
+├── task3/                              # Compute Resources
+│   ├── main.tf                         # EC2 instances, Elastic IPs
+│   ├── variables.tf
+│   ├── outputs.tf                      # Instance IDs, public IPs
+│   ├── terraform.tfvars
+│   └── README.md
+│
+├── task4/                              # Auto Scaling & Monitoring
+│   ├── main.tf                         # ASG, launch templates, CloudWatch
+│   ├── variables.tf
+│   ├── outputs.tf
+│   ├── terraform.tfvars
+│   └── README.md
+│
+├── task5/                              # Load Balancing
+│   ├── main.tf                         # ALB, target groups, listeners
+│   ├── variables.tf
+│   ├── outputs.tf                      # ALB DNS name, target group ARN
+│   ├── terraform.tfvars
+│   └── README.md
+│
+├── task6/                              # Modular Architecture with Packer
+│   ├── main.tf                         # Calls VPC, security, compute modules
+│   ├── variables.tf
+│   ├── outputs.tf
+│   ├── terraform.tfvars
+│   ├── README.md
+│   ├── modules/
+│   │   ├── vpc/                        # VPC module
+│   │   ├── security/                   # Security groups module
+│   │   └── compute/                    # Compute resources module
+│   └── packer/
+│       └── build.pkr.hcl               # Packer template for custom AMI
+│
+├── terraform.tfstate                   # State file (NEVER commit this)
+├── terraform.tfstate.backup            # Backup state (NEVER commit this)
+│
+└── .gitignore                          # Git ignore rules
+
+```
+
+---
+
+## Getting Started
+
+### 1. Clone or Navigate to Repository
+
 ```bash
-docker run -d --name sonarqube -p 9000:9000 sonarqube:community
+cd c:\Users\nasif\Downloads\bankManagementSystem
 ```
 
-Access SonarQube at:  
-`http://localhost:9000`
+### 2. Verify AWS Credentials
 
-(Default credentials: `admin / admin`)
-
----
-
-#### Step 2: Run SonarQube Scanner
-> Use this command in **PowerShell** (no local Maven installation required):
-
-```powershell
-docker run --rm --network host `
--v "${PWD}:/usr/src/mymaven" `
--w /usr/src/mymaven `
-maven:3.9-eclipse-temurin-17 /bin/bash -c "
-mvn clean verify org.sonarsource.scanner.maven:sonar -Dsonar.projectKey=atm_1 -Dsonar.projectName='My Awesome ATM' -Dsonar.host.url=http://host.docker.internal:9000 -Dsonar.token=YOUR_TOKEN_HERE
-"
+```bash
+aws sts get-caller-identity
 ```
 
-⚠️ Replace `YOUR_TOKEN_HERE` with your SonarQube authentication token.
+Expected output shows your AWS Account ID and ARN.
+
+### 3. Choose a Task
+
+Start with **Task 1** and work sequentially. Each task depends on previous infrastructure:
+
+- **Task 1** → Foundation (VPC)
+- **Task 1 + Task 2** → Networking (Security)
+- **Task 1 + Task 2 + Task 3** → Compute (EC2)
+- **Tasks 1-4** → Auto Scaling & Monitoring
+- **Tasks 1-5** → Load Balancing
+- **Tasks 1-6** → Modular Architecture with Custom AMI
 
 ---
 
-### 4. SonarQube Analysis Results
+## Initialization and Application
 
-- **Code Smells:** 152  
-- **Code Duplication:** 22.5%  
-- **Security Rating:** E (Critical)  
+### Step 1: Initialize Terraform
 
-These results highlight areas for refactoring, improved maintainability, and security hardening.
+Navigate to the task directory and initialize:
+
+```bash
+cd terraform-workspace/task1-vpc
+terraform init
+```
+
+**What happens:**
+- Downloads required Terraform providers (AWS)
+- Creates `.terraform/` directory
+- Generates `.terraform.lock.hcl` (dependency lock file)
+
+### Step 2: Validate Configuration
+
+```bash
+terraform validate
+```
+
+**Expected output:**
+```
+Success! The configuration is valid.
+```
+
+### Step 3: Plan Deployment
+
+Review what Terraform will create:
+
+```bash
+terraform plan
+```
+
+**Output shows:**
+- Resources to be created (`+`)
+- Resources to be modified (`~`)
+- Resources to be destroyed (`-`)
+
+Save plan (optional):
+```bash
+terraform plan -out=tfplan
+```
+
+### Step 4: Apply Configuration
+
+Deploy resources to AWS:
+
+```bash
+terraform apply
+```
+
+**Interactive confirmation:**
+```
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value:
+```
+
+Type `yes` to confirm.
+
+**Auto-approve (skip confirmation):**
+```bash
+terraform apply -auto-approve
+```
+
+**Expected output:**
+```
+Apply complete! Resources: X added, Y changed, Z destroyed.
+
+Outputs:
+vpc_id = "vpc-xxxxx..."
+subnet_ids = [...]
+```
+
+### Step 5: Verify Outputs
+
+View created resources:
+
+```bash
+terraform output
+```
+
+Or specific output:
+```bash
+terraform output vpc_id
+```
+
+### Applying Multiple Tasks in Sequence
+
+To build the complete infrastructure:
+
+```bash
+# Task 1: VPC Foundation
+cd terraform-workspace/task1-vpc
+terraform init
+terraform apply -auto-approve
+
+# Task 2: Security Groups
+cd ../task2
+terraform init
+terraform apply -auto-approve
+
+# Task 3: EC2 Instances
+cd ../task3
+terraform init
+terraform apply -auto-approve
+
+# Continue for Task 4, 5, 6...
+```
 
 ---
 
-<details>
-<summary><strong>🔻 Click here to view Original Project Documentation 🔻</strong></summary>
+## AWS Resources
 
-## Bank Management System
+### Task 1-VPC: Virtual Private Cloud
+- **VPC**: 10.0.0.0/16 CIDR block
+- **Public Subnets**: 2 subnets across 2 availability zones (10.0.1.0/24, 10.0.2.0/24)
+- **Private Subnets**: 2 subnets for backend (10.0.11.0/24, 10.0.12.0/24)
+- **Internet Gateway**: Enables public subnet internet access
+- **NAT Gateway**: Enables private subnet outbound internet access
+- **Route Tables**: Public and private routing configurations
 
-This section contains the **original documentation** from the source repository.
+### Task 2: Network Security
+- **Web Security Group**: Allows HTTP (80), HTTPS (443), SSH (22)
+- **Database Security Group**: Allows MySQL (3306) from web tier
 
-<!-- Bank Management System -->
-# ATM Simulator (Bank Management System)
+### Task 3: Compute Resources
+- **EC2 Instance**: t2.micro in public subnet
+- **Elastic IP**: Static public IP for EC2
+- **Root Volume**: 20 GB gp2 storage
 
-<!-- ABOUT THE PROJECT -->
-## About ATM Simulator
+### Task 4: Auto Scaling & Monitoring
+- **Launch Template**: Define EC2 configuration for scaling
+- **Auto Scaling Group**: 2-4 instances across availability zones
+- **CloudWatch Alarms**: Monitor CPU utilization
+- **Scaling Policies**: Scale up/down based on demand
 
-The "ATM Simulator" project is a model for Bank System Management. It enables the bank's customers to perform various banking tasks and transactions like creating an account with the bank, requesting and accessing various services and facilities offered by the bank, deposit/withdraw cash from their accounts, etc. The customers can access this banks application also for viewing their account balance, getting mini statements and performing transactions as per their requirement. Simply put, this project converts the brick-and-mortar structure of traditional banking system into a click and portal model, there by giving the concept of virtual banking a real shape in true sense.
+### Task 5: Load Balancing
+- **Application Load Balancer**: Distributes traffic across instances
+- **Target Group**: Registers EC2 instances as targets
+- **Listener**: Forwards HTTP traffic to target group
+- **Health Checks**: Monitor instance health
 
-The inspiration for this ATM Simulator project stems from the basic need of having an e-financial application in todays fast paced online world, for customers in banking environment. This project is meant to nurture the needs of an end banking user by providing them various ways to perform all banking tasks at the disposal of a few button clicks. Also, to easily enable functionalities which are otherwise not provided under a conventional banking project. This project has been developed to make banking processes easy and quick, which is a shortcoming of the traditional system.
+### Task 6: Modular Architecture + Packer
+- **Modules**: Reusable VPC, Security, Compute components
+- **Packer AMI**: Custom Ubuntu image with Nginx pre-installed
+- **EC2 from Custom AMI**: Instance launched from Packer-built image
 
-<!-- How to run ATM Simulator -->
-## How to install and run ATM Simulator
+---
 
-Follow the steps to run ATM Simulator.
+## Destroy Resources
 
-*Prerequisite: Install Java and MySQL on your server.
+### Destroy a Single Task
 
-1. Fork the Project / Download the source code as a zip file.
-2. Extract the code on your server.
-2. Open MySQL Workbench and run the ATM_Simulator.sql file from sql folder.
-3. Navigate to and open the "\src\atm\simulator\system\Conn.java" class and update details for your MySQL server, username and password.
-4. Now run the "\src\atm\simulator\system\Login.java".
-5. You could also create a MySQL user with credentials as username:"root" & password:"root", run the ATM_Simulator.sql file from sql folder and then directly run the /executable/ATM_Simulator.jar file.
+```bash
+cd terraform-workspace/task1-vpc
+terraform destroy
+```
 
-<!-- How to use ATM Simulator -->
-## How to use ATM Simulator
+**Confirmation prompt:**
+```
+Do you want to perform these actions?
+  Terraform will destroy all your managed infrastructure.
+  
+  Enter a value:
+```
 
-Follow these steps to use ATM Simulator.
+Type `yes` to confirm.
 
-1. When accessing first time, click sign up, fill up the form to create an account.
-2. Now Login with your cardnumber and pin to access the ATM Simulator GUI.
-3. You have the option of depositing money, withdrawing money or withdrawing using fast cash option.
-4. You also have the option of changing your PIN and checking your account balance.
-5. You can also request a mini statement for your account.
-6. The mini statement shows your name, your masked card number, you account balance and your last 10 transactions.
+**Auto-destroy (skip confirmation):**
+```bash
+terraform destroy -auto-approve
+```
 
-<!-- Screenshots of ATM Simulator -->
-### Screenshots of ATM Simulator
-<img src="/screenshots/1.jpg"
-     style="display: inline-block; margin: 0 auto; width:600px; height:400px;">
-<img src="/screenshots/2.jpg"
-     style="display: inline-block; margin: 0 auto; width:800px; height:600px;">
-<img src="/screenshots/4.jpg"
-     style="display: inline-block; margin: 0 auto; width:800px; height:600px;">     
-<img src="/screenshots/5.jpg"
-     style="display: inline-block; margin: 0 auto; width:800px; height:600px;">
-<img src="/screenshots/6.jpg"
-     style="display: inline-block; margin: 0 auto; width:800px; height:450px;">
-<img src="/screenshots/3.jpg"
-     style="display: inline-block; margin: 0 auto; width:800px; height:700px;">
-<!-- CONTRIBUTING -->
-## Contributing
+### Destroy Multiple Tasks (Reverse Order)
 
-If you have to add a feature, please fork the repo and create a pull request.
+**IMPORTANT**: Destroy in REVERSE order due to dependencies:
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/Feature`)
-3. Commit your Changes (`git commit -m 'Adding Feature'`)
-4. Push to the Branch (`git push origin feature/Feature`)
-5. Open a Pull Request
+```bash
+# Destroy Task 6 first
+cd terraform-workspace/task6
+terraform destroy -auto-approve
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+# Then Task 5
+cd ../task5
+terraform destroy -auto-approve
 
+# Then Task 4
+cd ../task4
+terraform destroy -auto-approve
 
-</details>
+# And so on... (Task 3, 2, 1)
+```
 
+### Verify Destruction
 
+Check AWS Console or use CLI:
+
+```bash
+aws ec2 describe-instances --filters "Name=instance-state-name,Values=running"
+aws ec2 describe-vpcs --filters "Name=cidr,Values=10.0.0.0/16"
+```
+
+---
+
+## Troubleshooting
+
+### Issue: "Terraform init" fails with provider error
+
+**Solution:**
+```bash
+# Clear Terraform cache
+rm -r .terraform/
+rm .terraform.lock.hcl
+
+# Reinitialize
+terraform init
+```
+
+### Issue: "Invalid credentials" or "UnauthorizedOperation"
+
+**Solution:**
+```bash
+# Verify AWS credentials
+aws configure
+aws sts get-caller-identity
+
+# Check AWS region
+aws configure get region
+```
+
+### Issue: "Resource already exists" during apply
+
+**Solution:**
+```bash
+# Check state file
+terraform state list
+
+# Import existing resource
+terraform import aws_instance.web i-1234567890abcdef0
+
+# Or refresh state
+terraform refresh
+```
+
+### Issue: Destroy fails with "Resource in use"
+
+**Common cause:** Dependency not resolved (e.g., ALB still attached to ASG)
+
+**Solution:**
+```bash
+# View dependencies
+terraform graph
+
+# Destroy in correct order (reverse of apply)
+# Task 6 → Task 5 → Task 4 → Task 3 → Task 2 → Task 1
+```
+
+### Issue: Long destroy times (15+ minutes)
+
+**Why:** AWS ENI detachment and subnet dependency propagation delays
+
+**Solution:**
+- Monitor progress: `terraform state list`
+- Don't interrupt the process
+- AWS takes time to fully remove resources
+
+### Issue: "Duplicate resource creation"
+
+**Solution:**
+1. Check if resource exists in AWS Console
+2. Remove from state if orphaned:
+   ```bash
+   terraform state rm aws_instance.web
+   ```
+3. Re-apply to recreate:
+   ```bash
+   terraform apply -auto-approve
+   ```
+
+### Issue: Packer AMI build fails (Task 6)
+
+**Solution:**
+```bash
+# Navigate to packer directory
+cd task6/packer
+
+# Validate template
+packer validate build.pkr.hcl
+
+# Build with debugging
+packer build -debug build.pkr.hcl
+```
+
+---
+
+## Common Commands Reference
+
+| Command | Description |
+|---------|-------------|
+| `terraform init` | Initialize Terraform workspace |
+| `terraform validate` | Validate configuration syntax |
+| `terraform plan` | Preview changes (dry-run) |
+| `terraform apply` | Apply configuration to AWS |
+| `terraform destroy` | Remove all resources |
+| `terraform output` | Display output values |
+| `terraform state list` | List resources in state |
+| `terraform state show <resource>` | Show resource details |
+| `terraform refresh` | Sync local state with AWS |
+| `terraform fmt` | Format HCL code |
+| `terraform taint <resource>` | Mark for recreation |
+
+---
+
+## Best Practices
+
+1. **Always run `terraform plan` before `apply`** - Review changes carefully
+2. **Use `terraform.tfvars` for environment-specific values** - Keep code reusable
+3. **Enable state locking** - Prevent concurrent modifications in team environments
+4. **Backup state files** - State is critical; store backup safely
+5. **Use version pinning** - Lock provider and module versions for consistency
+6. **Implement code review** - Changes to IaC should be reviewed before merge
+7. **Monitor AWS costs** - Resources have associated costs; monitor CloudWatch
+8. **Document outputs** - Document what each output represents for team clarity
+
+---
+
+## Support & Documentation
+
+- **Terraform Docs**: https://www.terraform.io/docs
+- **AWS Provider**: https://registry.terraform.io/providers/hashicorp/aws/latest
+- **Task READMEs**: See individual task `README.md` files for detailed configuration
+- **Packer Docs**: https://www.packer.io/docs
+
+---
+
+**Last Updated**: April 14, 2026  
+**Terraform Version**: 1.x  
+**AWS Region**: us-east-1 (configurable via variables)
 
