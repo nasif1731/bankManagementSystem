@@ -7,7 +7,6 @@ pipeline {
   }
 
   environment {
-    SLACK_WEBHOOK = credentials('slack-webhook')
     FAILED_STAGE = 'Unknown'
   }
 
@@ -163,35 +162,19 @@ pipeline {
 
     success {
       script {
-        def resp = sh(
-          script: '''
-            set +e
-            body=$(cat <<JSON | curl -sS -w "\nHTTP_STATUS:%{http_code}" -X POST -H 'Content-type: application/json' --data @- "$SLACK_WEBHOOK"
-            {"text":"SUCCESS: $JOB_NAME #$BUILD_NUMBER - $BUILD_URL"}
-JSON
-            )
-            echo "$body"
-          ''',
-          returnStdout: true
-        ).trim()
-        echo "Slack success notification response: ${resp}"
+        notifySlack(
+          message: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${env.BUILD_URL}",
+          credentialId: 'slack-webhook'
+        )
       }
     }
 
     failure {
       script {
-        def resp = sh(
-          script: '''
-            set +e
-            body=$(cat <<JSON | curl -sS -w "\nHTTP_STATUS:%{http_code}" -X POST -H 'Content-type: application/json' --data @- "$SLACK_WEBHOOK"
-            {"text":"FAILURE: $JOB_NAME #$BUILD_NUMBER failed at stage $FAILED_STAGE. Build: $BUILD_URL"}
-JSON
-            )
-            echo "$body"
-          ''',
-          returnStdout: true
-        ).trim()
-        echo "Slack failure notification response: ${resp}"
+        notifySlack(
+          message: "FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER} failed at stage ${env.FAILED_STAGE}. Build: ${env.BUILD_URL}",
+          credentialId: 'slack-webhook'
+        )
       }
     }
   }
