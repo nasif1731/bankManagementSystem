@@ -162,22 +162,34 @@ pipeline {
     }
 
     success {
-          --data "{\"text\":\"SUCCESS: $JOB_NAME #$BUILD_NUMBER - $BUILD_URL\"}" \\
-        sh """
-          curl -s -X POST -H 'Content-type: application/json' \\
-          --data '{"text":"SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${env.BUILD_URL}"}' \\
-          "$SLACK_WEBHOOK" || true
-        """
+      script {
+        def resp = sh(
+          script: '''
+            set +e
+            body=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" -X POST -H 'Content-type: application/json' \\
+              --data "{\"text\":\"SUCCESS: $JOB_NAME #$BUILD_NUMBER - $BUILD_URL\"}" \\
+              "$SLACK_WEBHOOK")
+            echo "$body"
+          ''',
+          returnStdout: true
+        ).trim()
+        echo "Slack success notification response: ${resp}"
       }
     }
 
     failure {
-          --data "{\"text\":\"FAILURE: $JOB_NAME #$BUILD_NUMBER failed at stage $FAILED_STAGE. Build: $BUILD_URL\"}" \\
-        sh """
-          curl -s -X POST -H 'Content-type: application/json' \\
-          --data '{"text":"FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER} failed at stage ${env.FAILED_STAGE}. Build: ${env.BUILD_URL}"}' \\
-          "$SLACK_WEBHOOK" || true
-        """
+      script {
+        def resp = sh(
+          script: '''
+            set +e
+            body=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" -X POST -H 'Content-type: application/json' \\
+              --data "{\"text\":\"FAILURE: $JOB_NAME #$BUILD_NUMBER failed at stage $FAILED_STAGE. Build: $BUILD_URL\"}" \\
+              "$SLACK_WEBHOOK")
+            echo "$body"
+          ''',
+          returnStdout: true
+        ).trim()
+        echo "Slack failure notification response: ${resp}"
       }
     }
   }
