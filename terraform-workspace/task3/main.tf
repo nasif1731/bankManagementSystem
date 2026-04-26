@@ -209,6 +209,17 @@ resource "aws_iam_role_policy" "s3_bucket_access" {
         Resource = [
           aws_dynamodb_table.terraform_locks.arn
         ]
+      },
+      {
+        Sid    = "S3BucketListAccess"
+        Effect = "Allow"
+        Action = [
+          "s3:DeleteObject",
+          "s3:GetBucketVersioning"
+        ]
+        Resource = [
+          aws_s3_bucket.terraform_state.arn
+        ]
       }
     ]
   })

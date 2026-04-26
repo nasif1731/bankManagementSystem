@@ -158,6 +158,14 @@ resource "aws_security_group" "web_sg" {
     description = "HTTPS from my IP"
   }
 
+ ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = [var.my_ip]
+    description = "HTTPS from my Webserver 8080"
+  }
+  
   # Allow SSH from my IP only
   ingress {
     from_port   = 22

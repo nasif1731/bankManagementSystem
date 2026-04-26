@@ -52,6 +52,17 @@ variable "public_subnet_2_cidr" {
   }
 }
 
+variable "public_subnet_3_cidr" {
+  description = "CIDR block for public subnet 3 in AZ 3"
+  type        = string
+  default     = "10.0.3.0/24"
+
+  validation {
+    condition     = can(cidrhost(var.public_subnet_3_cidr, 0))
+    error_message = "Public subnet 3 CIDR must be a valid IPv4 CIDR block."
+  }
+}
+
 variable "private_subnet_1_cidr" {
   description = "CIDR block for private subnet 1 in AZ 1"
   type        = string

@@ -1,0 +1,345 @@
+// ========================================
+// Jenkins Sanity-Check Pipeline
+// ========================================
+// This is a declarative pipeline that:
+// 1. Runs exclusively on the linux-agent
+// 2. Verifies the agent is properly configured
+// 3. Checks all required tools are installed
+// 4. Demonstrates basic pipeline structure
+//
+// This pipeline should succeed if the Jenkins setup is working correctly.
+
+pipeline {
+    // Run on the linux-agent label configured in Manage Nodes
+    agent {
+        label 'linux-agent'
+    }
+    
+    // Optional: Configure properties of the pipeline
+    options {
+        // Limit concurrent builds
+        concurrency(1)
+        
+        // Timeout after 10 minutes
+        timeout(time: 10, unit: 'MINUTES')
+        
+        // Keep last 10 builds
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        
+        // Timestamp in console output
+        timestamps()
+    }
+    
+    // Environment variables available throughout the pipeline
+    environment {
+        // Jenkins environment variables (built-in)
+        BUILD_NUMBER_PADDED = "${BUILD_NUMBER.padLeft(4, '0')}"
+        
+        // Custom variables
+        WORKSPACE_INFO = "${WORKSPACE}"
+    }
+    
+    // Define stages
+    stages {
+        // Stage 1: Verify Agent Connection
+        stage('Verify Agent Connection') {
+            steps {
+                script {
+                    echo """
+                    ════════════════════════════════════════
+                    Stage: Verify Agent Connection
+                    ════════════════════════════════════════
+                    """
+                }
+                
+                // Display agent hostname
+                sh 'echo "Agent Hostname: $(hostname)"'
+                
+                // Display current user
+                sh 'echo "Current User: $(whoami)"'
+                
+                // Display current working directory
+                sh 'echo "Working Directory: $(pwd)"'
+                
+                // Display node name from Jenkins
+                sh 'echo "Jenkins Node Name: $NODE_NAME"'
+            }
+        }
+        
+        // Stage 2: Verify Java Installation
+        stage('Verify Java') {
+            steps {
+                script {
+                    echo """
+                    ════════════════════════════════════════
+                    Stage: Verify Java Installation
+                    ════════════════════════════════════════
+                    """
+                }
+                
+                sh '''
+                    # Display Java version
+                    java -version
+                    
+                    # Display Java home
+                    echo "JAVA_HOME: $JAVA_HOME"
+                    
+                    # List Java executables
+                    which java
+                '''
+            }
+        }
+        
+        // Stage 3: Verify Git
+        stage('Verify Git') {
+            steps {
+                script {
+                    echo """
+                    ════════════════════════════════════════
+                    Stage: Verify Git
+                    ════════════════════════════════════════
+                    """
+                }
+                
+                sh '''
+                    # Display Git version
+                    git --version
+                    
+                    # Display Git config
+                    git config --list | head -5
+                    
+                    # Which git
+                    which git
+                '''
+            }
+        }
+        
+        // Stage 4: Verify Docker
+        stage('Verify Docker') {
+            steps {
+                script {
+                    echo """
+                    ════════════════════════════════════════
+                    Stage: Verify Docker
+                    ════════════════════════════════════════
+                    """
+                }
+                
+                sh '''
+                    # Display Docker version
+                    docker --version
+                    
+                    # Check Docker daemon is running
+                    docker ps -q | wc -l
+                    echo "Docker is accessible"
+                    
+                    # Which docker
+                    which docker
+                '''
+            }
+        }
+        
+        // Stage 5: Verify AWS CLI
+        stage('Verify AWS CLI') {
+            steps {
+                script {
+                    echo """
+                    ════════════════════════════════════════
+                    Stage: Verify AWS CLI
+                    ════════════════════════════════════════
+                    """
+                }
+                
+                sh '''
+                    # Display AWS CLI version
+                    aws --version
+                    
+                    # Test AWS credentials (without exposing them)
+                    aws sts get-caller-identity --query 'Account' --output text | sed 's/.*/Account: &/'
+                    
+                    # Which aws
+                    which aws
+                '''
+            }
+        }
+        
+        // Stage 6: Verify Terraform
+        stage('Verify Terraform') {
+            steps {
+                script {
+                    echo """
+                    ════════════════════════════════════════
+                    Stage: Verify Terraform
+                    ════════════════════════════════════════
+                    """
+                }
+                
+                sh '''
+                    # Display Terraform version
+                    terraform version
+                    
+                    # Which terraform
+                    which terraform
+                '''
+            }
+        }
+        
+        // Stage 7: System Information
+        stage('System Information') {
+            steps {
+                script {
+                    echo """
+                    ════════════════════════════════════════
+                    Stage: System Information
+                    ════════════════════════════════════════
+                    """
+                }
+                
+                sh '''
+                    # Display OS information
+                    echo "OS Information:"
+                    uname -a
+                    
+                    # Display disk space
+                    echo ""
+                    echo "Disk Space:"
+                    df -h | head -5
+                    
+                    # Display memory
+                    echo ""
+                    echo "Memory:"
+                    free -h
+                    
+                    # Display CPU count
+                    echo ""
+                    echo "CPU Count: $(nproc)"
+                '''
+            }
+        }
+        
+        // Stage 8: Final Verification
+        stage('Final Verification') {
+            steps {
+                script {
+                    echo """
+                    ════════════════════════════════════════
+                    Stage: Final Verification
+                    ════════════════════════════════════════
+                    """
+                }
+                
+                sh '''
+                    # All tools are present, print success message
+                    echo "✓ All required tools are installed and accessible"
+                    echo "✓ Jenkins agent is properly configured"
+                    echo "✓ Sanity check completed successfully!"
+                    
+                    # Display Jenkins workspace
+                    echo ""
+                    echo "Jenkins workspace contents:"
+                    ls -la .
+                '''
+            }
+        }
+    }
+    
+    // Post-build actions
+    post {
+        // Always runs regardless of build status
+        always {
+            script {
+                echo """
+                ════════════════════════════════════════
+                Pipeline Execution Summary
+                ════════════════════════════════════════
+                Build Number: ${BUILD_NUMBER}
+                Node: ${NODE_NAME}
+                Duration: ${currentBuild.durationString}
+                """
+            }
+        }
+        
+        // Runs only if build is successful
+        success {
+            script {
+                echo """
+                ════════════════════════════════════════
+                ✓ SUCCESS - Sanity Check Passed!
+                ════════════════════════════════════════
+                
+                The Jenkins controller and agent are properly configured.
+                All required tools are installed and functional.
+                
+                You can now proceed with:
+                1. Creating Groovy shared libraries (Task 2)
+                2. Setting up SonarQube integration (Task 3)
+                3. Configuring Docker/ECR pipeline (Task 3)
+                """
+            }
+        }
+        
+        // Runs only if build fails
+        failure {
+            script {
+                echo """
+                ════════════════════════════════════════
+                ✗ FAILURE - Sanity Check Failed!
+                ════════════════════════════════════════
+                
+                One or more required tools are missing or not accessible.
+                Review the build log above to identify the issue.
+                
+                Common issues:
+                1. Tool not installed - re-run user_data script
+                2. Tool not in PATH - check installation
+                3. Agent not properly configured - verify in Manage Nodes
+                """
+            }
+        }
+        
+        // Runs only if build is unstable
+        unstable {
+            script {
+                echo "Pipeline finished with UNSTABLE status"
+            }
+        }
+    }
+}
+
+// Notes on this Jenkinsfile:
+// 
+// 1. Agent Selection:
+//    - Runs on agent with label 'linux-agent'
+//    - Will NOT run on controller
+//    - Ensure agent is configured and online in Manage Nodes
+//
+// 2. Tool Verification:
+//    - Each stage verifies one tool is installed
+//    - Stages run sequentially
+//    - Failure in any stage stops the pipeline
+//
+// 3. Key Concepts:
+//    - pipeline {} - top level block
+//    - agent {} - where to run
+//    - stages {} - container for all stages
+//    - stage() {} - single stage
+//    - steps {} - actual commands
+//    - post {} - cleanup/notifications
+//
+// 4. Common Jenkins Variables:
+//    - ${BUILD_NUMBER} - current build number
+//    - ${NODE_NAME} - name of the agent
+//    - ${WORKSPACE} - agent's workspace directory
+//    - ${JOB_NAME} - name of the job
+//
+// 5. Shell Commands:
+//    - sh 'command' - runs single command
+//    - sh ''' multiline ''' - runs multiple commands
+//    - Commands fail the stage if they return non-zero exit code
+//
+// 6. Next Steps:
+//    - Modify stages to add more verifications
+//    - Add credentials binding for AWS/GitHub
+//    - Integrate with SonarQube
+//    - Add Docker build/push steps
+//    - Implement deployment logic

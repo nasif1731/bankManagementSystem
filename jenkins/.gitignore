@@ -1,0 +1,109 @@
+# Terraform State Files
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfvars files are often used to store sensitive data
+# Uncomment and modify if needed, but NEVER commit secrets!
+# override.tf.json
+# *.tfvars.json
+# *.tfvars
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files, which are likely to contain sensitive data
+# !example_override.tf.vars
+
+# Ignore override files, as they are usually used to override resources locally
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include override files needed for the cloud backend, with sensible defaults
+# !cloud_override.tf
+
+# Include all settings
+# !example_terraform.tfvars
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Ignore .DS_Store files (macOS)
+.DS_Store
+
+# Ignore SSH keys and credentials
+*.pem
+*.key
+*.pub
+id_rsa*
+known_hosts
+
+# Ignore IDE files
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+*.iml
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore logs
+*.log
+logs/
+
+# Ignore AWS credentials
+.aws/
+.credentials
+
+# Ignore Jenkins secrets
+secrets/
+.secrets/
+jenkins-secrets.txt
+
+# Ignore sensitive output files
+*-credentials.txt
+*-token.txt
+passwords.txt
+
+# Ignore environment files
+.env
+.env.local
+.env.*.local
+
+# Ignore archive files
+*.zip
+*.tar.gz
+*.tar
+
+# Ignore OS specific files
+Thumbs.db
+.DS_Store
+
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+
+# Ignore Node modules
+node_modules/
+
+# Ignore Maven build outputs
+target/
+*.class
+
+# Ignore example outputs
+example-output.txt
+
+# Ignore backup files
+*.backup
+*.bak

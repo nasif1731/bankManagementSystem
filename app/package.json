@@ -1,0 +1,27 @@
+{
+  "name": "task2-express-pipeline-app",
+  "version": "1.0.0",
+  "description": "Sample Express app for Jenkins declarative pipeline task",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "build": "node scripts/build.js",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "cross-env JEST_JUNIT_OUTPUT_DIR=reports/junit/unit JEST_JUNIT_OUTPUT_NAME=junit.xml jest --ci --runInBand --config jest.unit.config.js --reporters=default --reporters=jest-junit",
+    "test:integration": "cross-env JEST_JUNIT_OUTPUT_DIR=reports/junit/integration JEST_JUNIT_OUTPUT_NAME=junit.xml jest --ci --runInBand --config jest.integration.config.js --reporters=default --reporters=jest-junit",
+    "package": "node scripts/package.js",
+    "deploy": "node scripts/deploy.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "supertest": "^7.0.0"
+  }
+}

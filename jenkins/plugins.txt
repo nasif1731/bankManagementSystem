@@ -1,0 +1,168 @@
+# Jenkins Required Plugins
+# This file lists all required plugins for the Jenkins CI/CD pipeline setup
+#
+# Required Plugins (from assignment):
+# - Pipeline (Declarative pipeline support)
+# - Git (Git version control integration)
+# - GitHub Branch Source (GitHub integration with branch scanning)
+# - Docker Pipeline (Docker support in pipelines)
+# - Credentials Binding (Secure credential binding in pipelines)
+# - Pipeline Utility Steps (Utility steps for pipelines)
+# - SonarQube Scanner (Code quality scanning)
+# - Blue Ocean (Modern Jenkins UI)
+#
+# Additional Recommended Plugins (from setup wizard):
+# - SSH Agent (SSH key management)
+# - GitHub API (GitHub API integration)
+# - GitHub (GitHub integration)
+# - Email Extension (Email notifications)
+# - Slack Notification (Slack integration)
+# - Email Extension Plugin (Advanced email)
+# - Pipeline: AWS Steps (AWS integration for pipelines)
+# - AWS CodePipeline (AWS CodePipeline integration)
+
+# === Core Pipeline and Git Support ===
+pipeline-model-definition
+pipeline-model-api
+workflow-aggregator
+workflow-api
+workflow-support
+workflow-basic-steps
+workflow-cps
+workflow-cps-global-lib
+workflow-durable-task-step
+workflow-job
+workflow-multibranch
+workflow-step-api
+workflow-scm-step
+scm-api
+scm-api-2
+git
+git-client
+github-branch-source
+gitea
+
+# === Jenkins Blue Ocean (Modern UI) ===
+blueocean
+blueocean-core-js
+blueocean-commons
+blueocean-config
+blueocean-dashboard
+blueocean-events
+blueocean-github-pipeline
+blueocean-git-pipeline
+blueocean-i18n
+blueocean-jira
+blueocean-jwt
+blueocean-personalization
+blueocean-pipeline-scm-api
+blueocean-rest
+blueocean-rest-impl
+blueocean-web
+
+# === Docker Support ===
+docker-api
+docker-commons
+docker-workflow
+docker-build-publish
+
+# === Credentials and Security ===
+credentials
+credentials-binding
+ssh-credentials
+credentials-impl
+plain-credentials
+
+# === GitHub Integration ===
+github
+github-api
+github-oauth
+github-pullrequest
+
+# === SonarQube and Code Quality ===
+sonar
+sonargraph-integration
+code-coverage-api
+
+# === Notifications and Communication ===
+email-ext
+mailer
+slack
+slack-plugin
+simple-build-step
+
+# === AWS Integration ===
+aws-codecommit-trigger
+aws-codecompiler
+aws-codecompile-plugin
+aws-codedeploy
+codedeploy
+pipeline-aws
+aws-parameter-store
+
+# === Utility and Helper Plugins ===
+pipeline-utility-steps
+pipeline-stage-view
+pipeline-stage-tags-metadata
+timestamper
+log-parser
+description-setter
+build-name-updater
+envinject
+parameterized-trigger
+conditional-buildstep
+groovy-postbuild
+groovy
+script-security
+
+# === Performance and Metrics ===
+prometheus
+metrics
+performance
+cobertura
+
+# === Additional Support ===
+junit
+htmlpublisher
+archive-plugin
+ant
+maven-plugin
+javadoc
+warnings-next-generation
+checkstyle
+findbugs
+pmd
+violations
+matrix-auth
+role-strategy
+antisamy-markup-formatter
+apache-httpcomponents-client-4-api
+bouncycastle-api
+command-launcher
+display-url-api
+windows-slaves
+
+# === SSH and Remote Execution ===
+ssh
+ssh-agent
+ssh-slaves
+paramiko
+
+# === Miscellaneous ===
+analytics
+customization-monitor
+gradle
+nodejs
+trilead-api
+
+# Installation Instructions:
+# 1. Log into Jenkins as admin
+# 2. Navigate to Manage Jenkins > Manage Plugins > Available
+# 3. For each plugin listed, search by name and install
+# 4. Alternatively, use Jenkins CLI:
+#    java -jar jenkins-cli.jar -s http://localhost:8080 install-plugin <plugin-name>
+# 5. After installing all plugins, restart Jenkins:
+#    Manage Jenkins > Restart Jenkins
+
+# Note: Some plugins listed may be dependencies and installed automatically when you install others.
+# Plugin versions are not pinned to ensure compatibility with latest Jenkins LTS.
