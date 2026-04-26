@@ -1,98 +1,83 @@
-# Task 3: Code Quality with SonarQube and Docker ECR
+# Task 3: Reusable Jenkins Shared Library in Groovy
 
 ## Overview
 
-Task 3 integrates code quality scanning with SonarQube and builds/pushes Docker images to AWS ECR.
+This folder contains everything required for Task 3 in its own location:
 
-## What You'll Do
+- Shared library scaffold ready to publish as a separate repo `jenkins-shared-library`
+- Refactored Jenkinsfile that explicitly loads `@Library('your-lib') _`
+- Before/after diff reference for the Slack refactor
 
-1. **Integrate SonarQube scanner** into pipeline
-2. **Build Docker image** from Dockerfile
-3. **Push image to AWS ECR** (Elastic Container Registry)
-4. **Implement quality gates** (fail if code quality issues)
-5. **Scan Docker image** for vulnerabilities
-6. **Archive artifacts** for deployment
-
-## Pipeline Stages
-
-```
-1. Checkout Code (from Task 2 library)
-   ↓
-2. Build Artifact (from Task 2 library)
-   ↓
-3. SonarQube Scan (CODE QUALITY)
-   ↓
-4. Build Docker Image
-   ↓
-5. Push to ECR
-   ↓
-6. Cleanup & Archive
-```
-
-## Deliverables
-
-- [ ] Jenkinsfile with SonarQube integration
-- [ ] Dockerfile for application
-- [ ] ECR repository created in AWS
-- [ ] Pipeline successfully scans code quality
-- [ ] Docker image pushed to ECR
-- [ ] Screenshots showing:
-  - SonarQube dashboard with results
-  - ECR repository with pushed image
-  - Pipeline success
-  - Code metrics
-
-## Key Configuration
-
-### SonarQube Setup
-```groovy
-withSonarQubeEnv('SonarQube') {
-    sh '''
-        mvn clean verify \
-            -Dsonar.login=${SONARQUBE_TOKEN}
-    '''
-}
-```
-
-### Docker Build & Push
-```groovy
-sh '''
-    # Login to ECR
-    aws ecr get-login-password --region us-east-1 | \
-        docker login --username AWS --password-stdin <ECR_URI>
-    
-    # Build image
-    docker build -t my-app:${BUILD_NUMBER} .
-    
-    # Tag for ECR
-    docker tag my-app:${BUILD_NUMBER} <ECR_URI>/my-app:${BUILD_NUMBER}
-    
-    # Push to ECR
-    docker push <ECR_URI>/my-app:${BUILD_NUMBER}
-'''
-```
-
-## Files to Create
+## Folder Structure
 
 ```
 jenkins/tasks/task3/
-├── Jenkinsfile              # Pipeline with SonarQube + Docker
-├── README.md               # This file
-├── Dockerfile              # Docker image definition
-└── sonar-project.properties # SonarQube configuration
+├── Jenkinsfile
+├── README.md
+├── TASK3_DIFF.md
+└── jenkins-shared-library/
+    ├── README.md
+    ├── vars/
+    │   ├── notifySlack.groovy
+    │   ├── buildAndPushImage.groovy
+    │   └── runSonarScan.groovy
+    └── src/org/yourteam/
+        ├── NotificationService.groovy
+        └── DockerHelper.groovy
 ```
 
-## Status
+## Requirement Mapping
 
-- [ ] SonarQube instance running (could be local/cloud)
-- [ ] SonarQube token created and stored in Jenkins
-- [ ] ECR repository created in AWS
-- [ ] Dockerfile created for application
-- [ ] Jenkinsfile implements all stages
-- [ ] Pipeline successfully executes
-- [ ] Images pushed to ECR
-- [ ] Code quality gates working
+1. Separate repository `jenkins-shared-library`:
+   - Scaffold is available in `jenkins/tasks/task3/jenkins-shared-library/`
+   - Push this folder as a standalone GitHub repository.
 
----
+2. Global library registration in Jenkins:
+   - Name: `your-lib`
+   - Default version: `main`
+   - Load implicitly: disabled
+   - Pipelines load explicitly with `@Library('your-lib') _`
 
-**Next Task**: Task 4 - Blue-Green Deployment
+3. Groovy classes in `src/org/yourteam/`:
+   - `NotificationService`:
+     - `sendSlack(message)`
+     - `sendEmail(to, subject, body)`
+   - `DockerHelper`:
+     - `buildImage(name, tag)`
+     - `pushImage(name, tag)`
+
+4. Global vars with Map validation:
+   - `notifySlack.groovy`
+   - `buildAndPushImage.groovy`
+   - `runSonarScan.groovy`
+
+5. Task 2 Jenkinsfile refactor:
+   - Refactored version is in `jenkins/tasks/task3/Jenkinsfile`
+   - Slack post calls replaced by `notifySlack(...)`
+
+6. Shared library README:
+   - Included at `jenkins/tasks/task3/jenkins-shared-library/README.md`
+   - Contains class/var explanations and minimal usage example
+
+## Jenkins Setup Steps
+
+1. Create a new GitHub repository named `jenkins-shared-library`.
+2. Copy contents of `jenkins/tasks/task3/jenkins-shared-library/` into that repo.
+3. Push to `main` branch.
+4. In Jenkins:
+   - Manage Jenkins -> System -> Global Pipeline Libraries -> Add
+   - Name: `your-lib`
+   - Default version: `main`
+   - Disable `Load implicitly`
+   - Add Git repository URL of `jenkins-shared-library`
+5. Update pipeline script path for Task 3 job to:
+   - `jenkins/tasks/task3/Jenkinsfile`
+
+## Deliverables Checklist
+
+- Link to `jenkins-shared-library` GitHub repository
+- Screenshot: Jenkins Global Pipeline Libraries registration
+- Build log excerpt showing:
+  - `Loading library your-lib@main`
+- Before/after diff showing Slack post refactor:
+  - `jenkins/tasks/task3/TASK3_DIFF.md`

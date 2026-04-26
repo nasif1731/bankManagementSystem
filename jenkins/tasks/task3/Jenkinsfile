@@ -37,7 +37,6 @@ pipeline {
             curl -fsSL https://rpm.nodesource.com/setup_16.x | sudo bash -
             sudo yum clean all
             sudo yum makecache -y
-            # NodeSource nodejs package already contains npm; do not install separate npm package.
             sudo yum install -y nodejs
           fi
           node -v
