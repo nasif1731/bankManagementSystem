@@ -166,9 +166,10 @@ pipeline {
         def resp = sh(
           script: '''
             set +e
-            body=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" -X POST -H 'Content-type: application/json' \\
-              --data "{\"text\":\"SUCCESS: $JOB_NAME #$BUILD_NUMBER - $BUILD_URL\"}" \\
-              "$SLACK_WEBHOOK")
+            body=$(cat <<JSON | curl -sS -w "\nHTTP_STATUS:%{http_code}" -X POST -H 'Content-type: application/json' --data @- "$SLACK_WEBHOOK"
+            {"text":"SUCCESS: $JOB_NAME #$BUILD_NUMBER - $BUILD_URL"}
+JSON
+            )
             echo "$body"
           ''',
           returnStdout: true
@@ -182,9 +183,10 @@ pipeline {
         def resp = sh(
           script: '''
             set +e
-            body=$(curl -sS -w "\nHTTP_STATUS:%{http_code}" -X POST -H 'Content-type: application/json' \\
-              --data "{\"text\":\"FAILURE: $JOB_NAME #$BUILD_NUMBER failed at stage $FAILED_STAGE. Build: $BUILD_URL\"}" \\
-              "$SLACK_WEBHOOK")
+            body=$(cat <<JSON | curl -sS -w "\nHTTP_STATUS:%{http_code}" -X POST -H 'Content-type: application/json' --data @- "$SLACK_WEBHOOK"
+            {"text":"FAILURE: $JOB_NAME #$BUILD_NUMBER failed at stage $FAILED_STAGE. Build: $BUILD_URL"}
+JSON
+            )
             echo "$body"
           ''',
           returnStdout: true
