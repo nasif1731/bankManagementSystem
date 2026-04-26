@@ -26,6 +26,28 @@ pipeline {
       }
     }
 
+    stage('Setup Node') {
+      steps {
+        sh '''
+          set -e
+          if ! command -v npm >/dev/null 2>&1; then
+            echo "npm not found, installing Node.js 20..."
+            curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
+            sudo yum install -y nodejs
+          fi
+          node -v
+          npm -v
+        '''
+      }
+      post {
+        failure {
+          script {
+            env.FAILED_STAGE = env.STAGE_NAME
+          }
+        }
+      }
+    }
+
     stage('Build') {
       steps {
         dir('app') {
