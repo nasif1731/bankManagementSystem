@@ -14,12 +14,13 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
+          script { env.FAILED_STAGE = 'Checkout' }
         checkout scm
       }
       post {
         failure {
           script {
-            env.FAILED_STAGE = env.STAGE_NAME
+              env.FAILED_STAGE = 'Checkout'
           }
         }
       }
@@ -27,12 +28,18 @@ pipeline {
 
     stage('Setup Node') {
       steps {
+          script { env.FAILED_STAGE = 'Setup Node' }
         sh '''
           set -e
           if ! command -v npm >/dev/null 2>&1; then
-            echo "npm not found, installing Node.js 20..."
-            curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
-            sudo yum install -y nodejs
+            echo "npm not found, installing Node.js 16 (Amazon Linux 2 compatible)..."
+            if curl -fsSL https://rpm.nodesource.com/setup_16.x | sudo bash - && sudo yum install -y nodejs; then
+              echo "Installed Node.js from NodeSource."
+            else
+              echo "NodeSource install failed, trying amazon-linux-extras fallback..."
+              sudo amazon-linux-extras install -y epel
+              sudo yum install -y nodejs npm
+            fi
           fi
           node -v
           npm -v
@@ -41,7 +48,7 @@ pipeline {
       post {
         failure {
           script {
-            env.FAILED_STAGE = env.STAGE_NAME
+              env.FAILED_STAGE = 'Setup Node'
           }
         }
       }
@@ -49,6 +56,7 @@ pipeline {
 
     stage('Build') {
       steps {
+          script { env.FAILED_STAGE = 'Build' }
         dir('app') {
           sh 'npm ci'
           sh 'npm run build'
@@ -57,7 +65,7 @@ pipeline {
       post {
         failure {
           script {
-            env.FAILED_STAGE = env.STAGE_NAME
+              env.FAILED_STAGE = 'Build'
           }
         }
       }
@@ -68,6 +76,7 @@ pipeline {
       parallel {
         stage('Unit Tests') {
           steps {
+              script { env.FAILED_STAGE = 'Unit Tests' }
             dir('app') {
               sh 'npm install'
               sh 'npm run test:unit'
@@ -79,7 +88,7 @@ pipeline {
             }
             failure {
               script {
-                env.FAILED_STAGE = env.STAGE_NAME
+                  env.FAILED_STAGE = 'Unit Tests'
               }
             }
           }
@@ -87,6 +96,7 @@ pipeline {
 
         stage('Integration Tests') {
           steps {
+              script { env.FAILED_STAGE = 'Integration Tests' }
             dir('app') {
               sh 'npm install'
               sh 'npm run test:integration'
@@ -98,7 +108,7 @@ pipeline {
             }
             failure {
               script {
-                env.FAILED_STAGE = env.STAGE_NAME
+                  env.FAILED_STAGE = 'Integration Tests'
               }
             }
           }
@@ -117,6 +127,7 @@ pipeline {
 
     stage('Package') {
       steps {
+          script { env.FAILED_STAGE = 'Package' }
         dir('app') {
           sh 'npm run package'
         }
@@ -124,7 +135,7 @@ pipeline {
       post {
         failure {
           script {
-            env.FAILED_STAGE = env.STAGE_NAME
+              env.FAILED_STAGE = 'Package'
           }
         }
       }
@@ -132,6 +143,7 @@ pipeline {
 
     stage('Deploy') {
       steps {
+          script { env.FAILED_STAGE = 'Deploy' }
         dir('app') {
           sh 'npm run deploy'
         }
@@ -139,7 +151,7 @@ pipeline {
       post {
         failure {
           script {
-            env.FAILED_STAGE = env.STAGE_NAME
+              env.FAILED_STAGE = 'Deploy'
           }
         }
       }
@@ -152,7 +164,7 @@ pipeline {
     }
 
     success {
-      script {
+          --data "{\"text\":\"SUCCESS: $JOB_NAME #$BUILD_NUMBER - $BUILD_URL\"}" \\
         sh """
           curl -s -X POST -H 'Content-type: application/json' \\
           --data '{"text":"SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${env.BUILD_URL}"}' \\
@@ -162,7 +174,7 @@ pipeline {
     }
 
     failure {
-      script {
+          --data "{\"text\":\"FAILURE: $JOB_NAME #$BUILD_NUMBER failed at stage $FAILED_STAGE. Build: $BUILD_URL\"}" \\
         sh """
           curl -s -X POST -H 'Content-type: application/json' \\
           --data '{"text":"FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER} failed at stage ${env.FAILED_STAGE}. Build: ${env.BUILD_URL}"}' \\
