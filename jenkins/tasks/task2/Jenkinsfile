@@ -34,13 +34,11 @@ pipeline {
           set -e
           if ! command -v npm >/dev/null 2>&1; then
             echo "npm not found, installing Node.js 16 (Amazon Linux 2 compatible)..."
-            if curl -fsSL https://rpm.nodesource.com/setup_16.x | sudo bash - && sudo yum install -y nodejs; then
-              echo "Installed Node.js from NodeSource."
-            else
-              echo "NodeSource install failed, trying amazon-linux-extras fallback..."
-              sudo amazon-linux-extras install -y epel
-              sudo yum install -y nodejs npm
-            fi
+            curl -fsSL https://rpm.nodesource.com/setup_16.x | sudo bash -
+            sudo yum clean all
+            sudo yum makecache -y
+            # NodeSource nodejs package already contains npm; do not install separate npm package.
+            sudo yum install -y nodejs
           fi
           node -v
           npm -v
